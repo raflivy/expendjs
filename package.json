@@ -8,10 +8,7 @@
     "start": "node server.js",
     "build": "prisma generate",
     "postinstall": "prisma generate"
-<<<<<<< HEAD
 
-=======
->>>>>>> e076378fc673ed1364c1fcd06d19d892f5223b77
   },
   "dependencies": {
     "@prisma/client": "^6.10.0",

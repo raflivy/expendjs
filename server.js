@@ -67,17 +67,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Authentication middleware
 const requireAuth = (req, res, next) => {
-  console.log('Auth check - Session ID:', req.sessionID);
-  console.log('Auth check - Session data:', {
-    authenticated: req.session.authenticated,
-    loginTime: req.session.loginTime,
-    sessionAge: req.session.loginTime ? Date.now() - req.session.loginTime : 'N/A'
-  });
-  
   if (req.session.authenticated) {
     next();
   } else {
-    console.log('Authentication failed - session not authenticated');
     res.status(401).json({ error: "Authentication required" });
   }
 };
@@ -116,8 +108,7 @@ app.post("/api/login", async (req, res) => {
           console.error('Session save error:', err);
           return res.status(500).json({ error: "Session save failed" });
         }
-        console.log('Session saved successfully, ID:', req.sessionID);
-        res.json({ success: true, sessionId: req.sessionID });
+        res.json({ success: true });
       });
     } else {
       res.status(401).json({ error: "Invalid password" });
@@ -574,21 +565,6 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Test endpoint for deployment debugging
-app.get("/api/test", (req, res) => {
-  res.json({
-    message: "API is working!",
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
-      SESSION_SECRET_EXISTS: !!process.env.SESSION_SECRET,
-      ADMIN_PASSWORD_HASH_EXISTS: !!process.env.ADMIN_PASSWORD_HASH,
-      VERCEL: process.env.VERCEL || "not set",
-    },
-    timestamp: new Date().toISOString()
-  });
-});
-
 // Health check endpoint
 app.get("/api/health", async (req, res) => {
   try {
@@ -605,17 +581,6 @@ app.get("/api/health", async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
-});
-
-// Session status endpoint
-app.get("/api/session", (req, res) => {
-  res.json({
-    authenticated: !!req.session.authenticated,
-    sessionId: req.sessionID,
-    loginTime: req.session.loginTime,
-    sessionAge: req.session.loginTime ? Date.now() - req.session.loginTime : null,
-    session: req.session
-  });
 });
 
 module.exports = app;

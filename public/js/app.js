@@ -102,13 +102,9 @@ function expenseTracker() {
               console.log("User not authenticated");
               this.isAuthenticated = false;
             }
-          }
-        } catch (authError) {
-          console.error("Auth check error:", authError);
+          }        } catch (authError) {
           this.isAuthenticated = false;
         }
-
-        console.log("Init completed successfully");
       } catch (error) {
         console.error("Init error:", error);
         this.error = "Error initializing app: " + error.message;
@@ -138,35 +134,14 @@ function expenseTracker() {
           body: JSON.stringify({ password: this.password }),
         });        const data = await response.json();
         if (response.ok) {
-          console.log("Login successful, session ID:", data.sessionId);
           this.isAuthenticated = true;
           this.password = "";
-          
-          // Immediately check session status
-          setTimeout(async () => {
-            try {
-              const sessionCheck = await fetch("/api/session");
-              const sessionData = await sessionCheck.json();
-              console.log("Session after login:", sessionData);
-              if (!sessionData.authenticated) {
-                console.warn("Session not authenticated after login!");
-                this.isAuthenticated = false;
-                notifications.error("Session gagal tersimpan, coba login lagi");
-                return;
-              }
-            } catch (err) {
-              console.warn("Session check failed:", err);
-            }
-          }, 1000);
-          
           await this.loadData();
           notifications.success("Login berhasil!");
         } else {
           this.error = data.error || "Login failed";
           notifications.error(this.error);
-        }
-      } catch (error) {
-        console.error("Login connection error:", error);
+        }      } catch (error) {
         this.error = "Connection error: " + error.message;
         notifications.error("Gagal terhubung ke server. Periksa koneksi internet dan coba lagi.");
       } finally {

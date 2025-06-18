@@ -3,8 +3,9 @@ function expenseTracker() {
     // Authentication
     isAuthenticated: false,
     password: "",
-    loading: false,
-    error: "", // Navigation and Theme
+    loading: false,    error: "", 
+    
+    // Navigation and Theme
     activeTab: "home",
     isDarkMode: false,
 
@@ -65,9 +66,15 @@ function expenseTracker() {
     dateFilter: {
       start: "",
       end: "",
-    }, // Chart
-    monthlyChart: null, // Theme settings
-    isDarkMode: false, // Initialization
+    },
+    
+    // Chart
+    monthlyChart: null,
+    
+    // Theme settings
+    isDarkMode: false,
+    
+    // Initialization
     async init() {
       try {
         console.log("ExpenseTracker init started");
@@ -245,7 +252,9 @@ function expenseTracker() {
       } finally {
         this.loading = false;
       }
-    }, // Data loading methods
+    },
+    
+    // Data loading methods
     async loadData() {
       if (!this.requireAuth()) return;
 
@@ -551,7 +560,9 @@ function expenseTracker() {
         color: "#10B981",
         icon: "🏦",
       };
-    }, // Navigation methods
+    },
+    
+    // Navigation methods
     setActiveTab(tab) {
       if (!this.requireAuth() && tab !== "home") return;
       this.activeTab = tab;

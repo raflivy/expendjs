@@ -296,3 +296,13 @@ Jika mengalami masalah:
 2. Cek database connection
 3. Pastikan environment variables benar
 4. Cek Prisma schema dan migration
+
+## 🔑 UPDATED PASSWORD HASH
+
+**The password hash in .env has been updated. For Vercel deployment, update this environment variable:**
+
+```
+ADMIN_PASSWORD_HASH=$2a$10$R712Z2vVLZ1m7NPYlTC4m.TVaWAuuyXz4L3RiYyRrs60ciCqufip6
+```
+
+This hash corresponds to password: `password`

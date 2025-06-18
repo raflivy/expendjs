@@ -7,6 +7,10 @@
       "config": {
         "includeFiles": ["prisma/schema.prisma"]
       }
+    },
+    {
+      "src": "public/**/*",
+      "use": "@vercel/static"
     }
   ],
   "routes": [

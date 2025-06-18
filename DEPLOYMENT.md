@@ -1,11 +1,13 @@
 # 🚨 VERCEL DEPLOYMENT FIX
 
 ## The Problem
+
 You're getting "Connection error" because environment variables aren't set in Vercel.
 
 ## IMMEDIATE SOLUTION:
 
 ### Step 1: Set Environment Variables in Vercel
+
 1. Go to: https://vercel.com/dashboard
 2. Click your project "vyexpend"
 3. Go to "Settings" → "Environment Variables"
@@ -19,9 +21,11 @@ NODE_ENV=production
 ```
 
 ### Step 2: Redeploy
+
 After setting environment variables, trigger a new deployment.
 
 ### Step 3: Test
+
 - Test API: https://vyexpend.vercel.app/api/test
 - Health check: https://vyexpend.vercel.app/api/health
 - Login password: `password`

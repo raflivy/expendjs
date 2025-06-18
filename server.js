@@ -51,14 +51,14 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { 
+    cookie: {
       secure: false, // Set to true only if using HTTPS
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      sameSite: 'lax'
+      sameSite: "lax",
     },
     // For serverless environments
-    name: 'expense-tracker-session'
+    name: "expense-tracker-session",
   })
 );
 
@@ -89,7 +89,7 @@ app.post("/api/login", async (req, res) => {
     }
 
     const { password } = req.body;
-    
+
     if (!process.env.ADMIN_PASSWORD_HASH) {
       console.error("ADMIN_PASSWORD_HASH not found in environment");
       return res.status(500).json({ error: "Server configuration error" });
@@ -98,14 +98,15 @@ app.post("/api/login", async (req, res) => {
     const isValid = await bcrypt.compare(
       password,
       process.env.ADMIN_PASSWORD_HASH
-    );    if (isValid) {
+    );
+    if (isValid) {
       req.session.authenticated = true;
       req.session.loginTime = Date.now();
-      
+
       // Save session explicitly for serverless
       req.session.save((err) => {
         if (err) {
-          console.error('Session save error:', err);
+          console.error("Session save error:", err);
           return res.status(500).json({ error: "Session save failed" });
         }
         res.json({ success: true });
@@ -533,7 +534,7 @@ if (!process.env.VERCEL) {
   app.listen(PORT, async () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log("Initializing application...");
-    
+
     // Test database connection before starting
     const dbConnected = await testDatabaseConnection();
     if (dbConnected) {
@@ -545,22 +546,24 @@ if (!process.env.VERCEL) {
         console.error("❌ Failed to initialize default data:", error);
       }
     } else {
-      console.error("❌ Database connection failed - some features may not work");
+      console.error(
+        "❌ Database connection failed - some features may not work"
+      );
     }
-    
+
     console.log("🚀 Application ready!");
   });
 }
 
 // Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Received SIGINT, shutting down gracefully...');
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT, shutting down gracefully...");
   await prisma.$disconnect();
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM, shutting down gracefully...');
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM, shutting down gracefully...");
   await prisma.$disconnect();
   process.exit(0);
 });
@@ -572,13 +575,13 @@ app.get("/api/health", async (req, res) => {
     res.json({
       status: "ok",
       database: dbConnected ? "connected" : "disconnected",
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       status: "error",
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });

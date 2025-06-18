@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Debug Connection",
+    "script": "node debug-connection.js"
+  },
+  {
+    "name": "Generate Prisma",
+    "script": "npx prisma generate"
+  },
+  {
+    "name": "Deploy Migrations",
+    "script": "npx prisma migrate deploy"
+  },
+  {
+    "name": "Reset Database",
+    "script": "npx prisma migrate reset --force"
+  },
+  {
+    "name": "Check Migration Status",
+    "script": "npx prisma migrate status"
+  }
+]

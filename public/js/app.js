@@ -3,8 +3,9 @@ function expenseTracker() {
     // Authentication
     isAuthenticated: false,
     password: "",
-    loading: false,    error: "", 
-    
+    loading: false,
+    error: "",
+
     // Navigation and Theme
     activeTab: "home",
     isDarkMode: false,
@@ -67,26 +68,26 @@ function expenseTracker() {
       start: "",
       end: "",
     },
-    
+
     // Chart
     monthlyChart: null,
-    
+
     // Theme settings
     isDarkMode: false,
-    
+
     // Initialization
     async init() {
       try {
         console.log("ExpenseTracker init started");
         // Load saved theme
         this.loadTheme();
-        console.log("Theme loaded");        // Check if already authenticated
+        console.log("Theme loaded"); // Check if already authenticated
         try {
           // First check session status
           const sessionResponse = await fetch("/api/session");
           const sessionData = await sessionResponse.json();
           console.log("Initial session check:", sessionData);
-          
+
           if (sessionData.authenticated) {
             console.log("User authenticated via session");
             this.isAuthenticated = true;
@@ -102,7 +103,8 @@ function expenseTracker() {
               console.log("User not authenticated");
               this.isAuthenticated = false;
             }
-          }        } catch (authError) {
+          }
+        } catch (authError) {
           this.isAuthenticated = false;
         }
       } catch (error) {
@@ -132,7 +134,8 @@ function expenseTracker() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ password: this.password }),
-        });        const data = await response.json();
+        });
+        const data = await response.json();
         if (response.ok) {
           this.isAuthenticated = true;
           this.password = "";
@@ -141,9 +144,12 @@ function expenseTracker() {
         } else {
           this.error = data.error || "Login failed";
           notifications.error(this.error);
-        }      } catch (error) {
+        }
+      } catch (error) {
         this.error = "Connection error: " + error.message;
-        notifications.error("Gagal terhubung ke server. Periksa koneksi internet dan coba lagi.");
+        notifications.error(
+          "Gagal terhubung ke server. Periksa koneksi internet dan coba lagi."
+        );
       } finally {
         this.loading = false;
       }
@@ -228,7 +234,7 @@ function expenseTracker() {
         this.loading = false;
       }
     },
-    
+
     // Data loading methods
     async loadData() {
       if (!this.requireAuth()) return;
@@ -536,7 +542,7 @@ function expenseTracker() {
         icon: "🏦",
       };
     },
-    
+
     // Navigation methods
     setActiveTab(tab) {
       if (!this.requireAuth() && tab !== "home") return;

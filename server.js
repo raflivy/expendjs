@@ -51,7 +51,14 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
+    cookie: { 
+      secure: false, // Set to true only if using HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax'
+    },
+    // For serverless environments
+    name: 'expense-tracker-session'
   })
 );
 
@@ -60,9 +67,17 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Authentication middleware
 const requireAuth = (req, res, next) => {
+  console.log('Auth check - Session ID:', req.sessionID);
+  console.log('Auth check - Session data:', {
+    authenticated: req.session.authenticated,
+    loginTime: req.session.loginTime,
+    sessionAge: req.session.loginTime ? Date.now() - req.session.loginTime : 'N/A'
+  });
+  
   if (req.session.authenticated) {
     next();
   } else {
+    console.log('Authentication failed - session not authenticated');
     res.status(401).json({ error: "Authentication required" });
   }
 };
@@ -91,11 +106,19 @@ app.post("/api/login", async (req, res) => {
     const isValid = await bcrypt.compare(
       password,
       process.env.ADMIN_PASSWORD_HASH
-    );
-
-    if (isValid) {
+    );    if (isValid) {
       req.session.authenticated = true;
-      res.json({ success: true });
+      req.session.loginTime = Date.now();
+      
+      // Save session explicitly for serverless
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ error: "Session save failed" });
+        }
+        console.log('Session saved successfully, ID:', req.sessionID);
+        res.json({ success: true, sessionId: req.sessionID });
+      });
     } else {
       res.status(401).json({ error: "Invalid password" });
     }
@@ -582,6 +605,17 @@ app.get("/api/health", async (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// Session status endpoint
+app.get("/api/session", (req, res) => {
+  res.json({
+    authenticated: !!req.session.authenticated,
+    sessionId: req.sessionID,
+    loginTime: req.session.loginTime,
+    sessionAge: req.session.loginTime ? Date.now() - req.session.loginTime : null,
+    session: req.session
+  });
 });
 
 module.exports = app;

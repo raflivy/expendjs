@@ -73,18 +73,28 @@ function expenseTracker() {
         console.log("ExpenseTracker init started");
         // Load saved theme
         this.loadTheme();
-        console.log("Theme loaded");
-
-        // Check if already authenticated
+        console.log("Theme loaded");        // Check if already authenticated
         try {
-          const response = await fetch("/api/expenses");
-          if (response.ok) {
-            console.log("User authenticated");
+          // First check session status
+          const sessionResponse = await fetch("/api/session");
+          const sessionData = await sessionResponse.json();
+          console.log("Initial session check:", sessionData);
+          
+          if (sessionData.authenticated) {
+            console.log("User authenticated via session");
             this.isAuthenticated = true;
             await this.loadData();
           } else {
-            console.log("User not authenticated");
-            this.isAuthenticated = false;
+            // Fallback: try to access protected endpoint
+            const response = await fetch("/api/expenses");
+            if (response.ok) {
+              console.log("User authenticated via expenses endpoint");
+              this.isAuthenticated = true;
+              await this.loadData();
+            } else {
+              console.log("User not authenticated");
+              this.isAuthenticated = false;
+            }
           }
         } catch (authError) {
           console.error("Auth check error:", authError);
@@ -121,8 +131,27 @@ function expenseTracker() {
           body: JSON.stringify({ password: this.password }),
         });        const data = await response.json();
         if (response.ok) {
+          console.log("Login successful, session ID:", data.sessionId);
           this.isAuthenticated = true;
           this.password = "";
+          
+          // Immediately check session status
+          setTimeout(async () => {
+            try {
+              const sessionCheck = await fetch("/api/session");
+              const sessionData = await sessionCheck.json();
+              console.log("Session after login:", sessionData);
+              if (!sessionData.authenticated) {
+                console.warn("Session not authenticated after login!");
+                this.isAuthenticated = false;
+                notifications.error("Session gagal tersimpan, coba login lagi");
+                return;
+              }
+            } catch (err) {
+              console.warn("Session check failed:", err);
+            }
+          }, 1000);
+          
           await this.loadData();
           notifications.success("Login berhasil!");
         } else {

@@ -66,15 +66,15 @@ function expenseTracker() {
       start: "",
       end: "",
     }, // Chart
-    monthlyChart: null,    // Theme settings
-    isDarkMode: false,// Initialization
+    monthlyChart: null, // Theme settings
+    isDarkMode: false, // Initialization
     async init() {
       try {
         console.log("ExpenseTracker init started");
         // Load saved theme
         this.loadTheme();
         console.log("Theme loaded");
-        
+
         // Check if already authenticated
         try {
           const response = await fetch("/api/expenses");
@@ -90,7 +90,7 @@ function expenseTracker() {
           console.error("Auth check error:", authError);
           this.isAuthenticated = false;
         }
-        
+
         console.log("Init completed successfully");
       } catch (error) {
         console.error("Init error:", error);
@@ -216,10 +216,10 @@ function expenseTracker() {
       } finally {
         this.loading = false;
       }
-    },    // Data loading methods
+    }, // Data loading methods
     async loadData() {
       if (!this.requireAuth()) return;
-      
+
       await Promise.all([
         this.loadExpenses(),
         this.loadCategories(),
@@ -243,7 +243,8 @@ function expenseTracker() {
       if (response && response.ok) {
         this.categories = await response.json();
       }
-    },    async loadSources() {
+    },
+    async loadSources() {
       const response = await this.apiCall("/api/sources");
       if (response && response.ok) {
         this.sources = await response.json();
@@ -265,7 +266,7 @@ function expenseTracker() {
     // Expense methods
     async submitExpense() {
       if (!this.requireAuth()) return;
-      
+
       this.loading = true;
 
       try {
@@ -296,7 +297,8 @@ function expenseTracker() {
           notifications.error(data.error || "Gagal menyimpan pengeluaran");
         }
       } catch (error) {
-        alert("Connection error");      } finally {
+        alert("Connection error");
+      } finally {
         this.loading = false;
       }
     },
@@ -522,7 +524,7 @@ function expenseTracker() {
       };
     }, // Navigation methods
     setActiveTab(tab) {
-      if (!this.requireAuth() && tab !== 'home') return;
+      if (!this.requireAuth() && tab !== "home") return;
       this.activeTab = tab;
 
       // Update navbar and body styling
@@ -794,7 +796,8 @@ function expenseTracker() {
     },
 
     // Load theme dari localStorage
-    loadTheme() {      const savedTheme = localStorage.getItem("darkMode");
+    loadTheme() {
+      const savedTheme = localStorage.getItem("darkMode");
       if (savedTheme === "true") {
         this.isDarkMode = true;
         this.applyTheme();
@@ -818,10 +821,10 @@ function expenseTracker() {
       if (!this.requireAuth()) {
         return null;
       }
-      
+
       try {
         const response = await fetch(url, options);
-        
+
         // Check if session expired
         if (response.status === 401) {
           console.warn("Session expired, redirecting to login");
@@ -831,14 +834,15 @@ function expenseTracker() {
           }
           return null;
         }
-        
+
         return response;
       } catch (error) {
         console.error("API call failed:", error);
         if (window.notifications) {
           notifications.error("Terjadi kesalahan koneksi");
         }
-        return null;      }
-    }
+        return null;
+      }
+    },
   };
 }

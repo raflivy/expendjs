@@ -1,3 +1,33 @@
+# 🚨 VERCEL DEPLOYMENT FIX
+
+## The Problem
+You're getting "Connection error" because environment variables aren't set in Vercel.
+
+## IMMEDIATE SOLUTION:
+
+### Step 1: Set Environment Variables in Vercel
+1. Go to: https://vercel.com/dashboard
+2. Click your project "vyexpend"
+3. Go to "Settings" → "Environment Variables"
+4. Add these EXACT variables:
+
+```
+DATABASE_URL=postgresql://neondb_owner:npg_48zRybFhouKm@ep-wandering-mouse-a8ghusyc-pooler.eastus2.azure.neon.tech/neondb?sslmode=require
+SESSION_SECRET=tImBaDIbaKoBuAtBaiKdIBalaSkoKoApAMaSalaHmu
+ADMIN_PASSWORD_HASH=$2a$10$bJpRHVjUw556WhjBW4RyF3OuYQz/TOSJKOEtz8Eok44NFQiW65oir6i
+NODE_ENV=production
+```
+
+### Step 2: Redeploy
+After setting environment variables, trigger a new deployment.
+
+### Step 3: Test
+- Test API: https://vyexpend.vercel.app/api/test
+- Health check: https://vyexpend.vercel.app/api/health
+- Login password: `password`
+
+---
+
 # Deployment Guide untuk Vercel
 
 ## 🏠 Development Lokal

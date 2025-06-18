@@ -119,9 +119,7 @@ function expenseTracker() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ password: this.password }),
-        });
-
-        const data = await response.json();
+        });        const data = await response.json();
         if (response.ok) {
           this.isAuthenticated = true;
           this.password = "";
@@ -132,7 +130,9 @@ function expenseTracker() {
           notifications.error(this.error);
         }
       } catch (error) {
-        this.error = "Connection error";
+        console.error("Login connection error:", error);
+        this.error = "Connection error: " + error.message;
+        notifications.error("Gagal terhubung ke server. Periksa koneksi internet dan coba lagi.");
       } finally {
         this.loading = false;
       }

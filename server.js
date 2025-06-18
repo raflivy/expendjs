@@ -7,9 +7,40 @@ const path = require("path");
 const { PrismaClient } = require("@prisma/client");
 require("dotenv").config();
 
-const prisma = new PrismaClient();
+// Add error handling for database connection
+let prisma;
+try {
+  prisma = new PrismaClient({
+    log: ["query", "error", "warn"],
+    errorFormat: "pretty",
+  });
+  console.log("Prisma client initialized successfully");
+} catch (error) {
+  console.error("Failed to initialize Prisma client:", error);
+  process.exit(1);
+}
+
+// Test database connection
+async function testDatabaseConnection() {
+  try {
+    await prisma.$connect();
+    console.log("Database connection successful");
+    return true;
+  } catch (error) {
+    console.error("Database connection failed:", error);
+    return false;
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Debug environment variables
+console.log("Environment check:");
+console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
+console.log("SESSION_SECRET exists:", !!process.env.SESSION_SECRET);
+console.log("ADMIN_PASSWORD_HASH exists:", !!process.env.ADMIN_PASSWORD_HASH);
+console.log("PORT:", PORT);
 
 // Middleware
 app.use(cors());
@@ -44,7 +75,19 @@ app.get("/", (req, res) => {
 // Authentication routes
 app.post("/api/login", async (req, res) => {
   try {
+    // Check database connection first
+    const dbConnected = await testDatabaseConnection();
+    if (!dbConnected) {
+      return res.status(500).json({ error: "Database connection failed" });
+    }
+
     const { password } = req.body;
+    
+    if (!process.env.ADMIN_PASSWORD_HASH) {
+      console.error("ADMIN_PASSWORD_HASH not found in environment");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
     const isValid = await bcrypt.compare(
       password,
       process.env.ADMIN_PASSWORD_HASH
@@ -57,7 +100,8 @@ app.post("/api/login", async (req, res) => {
       res.status(401).json({ error: "Invalid password" });
     }
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Server error: " + error.message });
   }
 });
 
@@ -470,10 +514,74 @@ async function initializeData() {
   }
 }
 
-// Start server
-app.listen(PORT, async () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  await initializeData();
+// Start server (only in non-serverless environment)
+if (!process.env.VERCEL) {
+  app.listen(PORT, async () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log("Initializing application...");
+    
+    // Test database connection before starting
+    const dbConnected = await testDatabaseConnection();
+    if (dbConnected) {
+      console.log("✅ Database connection successful");
+      try {
+        await initializeData();
+        console.log("✅ Default data initialization completed");
+      } catch (error) {
+        console.error("❌ Failed to initialize default data:", error);
+      }
+    } else {
+      console.error("❌ Database connection failed - some features may not work");
+    }
+    
+    console.log("🚀 Application ready!");
+  });
+}
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Received SIGINT, shutting down gracefully...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Received SIGTERM, shutting down gracefully...');
+  await prisma.$disconnect();
+  process.exit(0);
+});
+
+// Test endpoint for deployment debugging
+app.get("/api/test", (req, res) => {
+  res.json({
+    message: "API is working!",
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+      SESSION_SECRET_EXISTS: !!process.env.SESSION_SECRET,
+      ADMIN_PASSWORD_HASH_EXISTS: !!process.env.ADMIN_PASSWORD_HASH,
+      VERCEL: process.env.VERCEL || "not set",
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Health check endpoint
+app.get("/api/health", async (req, res) => {
+  try {
+    const dbConnected = await testDatabaseConnection();
+    res.json({
+      status: "ok",
+      database: dbConnected ? "connected" : "disconnected",
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 module.exports = app;
